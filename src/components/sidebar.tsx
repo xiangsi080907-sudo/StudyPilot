@@ -13,7 +13,8 @@ const navItems: Array<{ id: View; label: string; icon: IconName }> = [
   { id: "assistant", label: "AI Assistant", icon: "sparkle" },
 ];
 
-export function Sidebar({ activeView, onChange }: { activeView: View; onChange: (view: View) => void }) {
+export function Sidebar({ activeView, onChange, mode, userName, onExit }: { activeView: View; onChange: (view: View) => void; mode: "authenticated" | "demo"; userName: string; onExit: () => void }) {
+  const initials = userName.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   return <aside className="sidebar">
     <button className="brand" onClick={() => onChange("dashboard")} aria-label="StudyPilot home"><span className="brand-mark"><Icon name="lightning" size={19} /></span><span>StudyPilot</span></button>
     <div className="workspace-label">WORKSPACE</div>
@@ -22,7 +23,9 @@ export function Sidebar({ activeView, onChange }: { activeView: View; onChange: 
     </nav>
     <div className="sidebar-bottom">
       <button className={`nav-item ${activeView === "settings" ? "active" : ""}`} onClick={() => onChange("settings")}><Icon name="settings" size={18} /><span>Settings</span></button>
-      <div className="profile"><div className="avatar">MC</div><div><strong>Maya Chen</strong><span>Computer Science</span></div><Icon name="chevron" size={15} className="profile-chevron" /></div>
+      {mode === "demo" && <div className="demo-sidebar-note"><Icon name="sparkle" size={14} /><span>Demo mode</span></div>}
+      <div className="profile"><div className="avatar">{initials}</div><div><strong>{userName}</strong><span>{mode === "demo" ? "Sample workspace" : "Your workspace"}</span></div><Icon name="chevron" size={15} className="profile-chevron" /></div>
+      <button className="nav-item exit-button" onClick={onExit}><Icon name="arrow" size={17} className="exit-icon" /><span>{mode === "demo" ? "Exit demo" : "Log out"}</span></button>
     </div>
   </aside>;
 }

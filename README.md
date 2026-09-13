@@ -96,7 +96,7 @@ The Prisma schema includes `User`, `Course`, `Task`, `Availability`, `BlockedTim
    npm run dev
    ```
 
-Open [http://localhost:3000](http://localhost:3000). The dashboard has a service-free in-memory demo state, so it looks useful immediately even before a database or OpenAI key is configured. After seeding, the Auth.js demo credentials are `demo@studypilot.app` / `DemoPass123!`.
+Open [http://localhost:3000](http://localhost:3000). Unauthenticated visitors see the public landing page; they can sign in, create an account, or choose the clearly labeled `/demo` experience. Demo mode uses service-free in-memory seed data, is never an authenticated account, and exits back to the landing page. After database seeding, an Auth.js demo account is also available at `demo@studypilot.app` / `DemoPass123!` for authentication testing.
 
 ### Environment variables
 
@@ -129,7 +129,7 @@ npm run test:e2e
 npm run build
 ```
 
-The unit suite verifies deadline-based prioritization and availability-aware session splitting. The Playwright suite verifies dashboard rendering, plan generation/navigation, and course management navigation.
+The unit suite verifies deadline-based prioritization, credential authorization, registration hashing, authenticated-route protection, and availability-aware session splitting. The Playwright suite covers the unauthenticated landing page, explicit demo entry/exit, demo scheduling, auth-page navigation, and protected API behavior.
 
 ## Deployment
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { AnalyticsView, AssistantView, SettingsView } from "@/components/insights-views";
 import { CalendarView } from "@/components/calendar-view";
 import { DashboardView } from "@/components/dashboard-view";
@@ -8,10 +9,11 @@ import { CoursesView, TasksView } from "@/components/management-views";
 import { Sidebar, type View } from "@/components/sidebar";
 import { Icon } from "@/components/ui/icon";
 import type { Course, PlannerData, StudySession, StudyTask } from "@/lib/types";
+import { leaveWorkspace, type WorkspaceMode } from "@/lib/workspace-exit";
 
 const viewTitle: Record<View, string> = { dashboard: "Dashboard", courses: "Courses", tasks: "Tasks", calendar: "Calendar", analytics: "Analytics", assistant: "AI Assistant", settings: "Settings" };
 
-export function AppShell({ initialData }: { initialData: PlannerData }) {
+export function AppShell({ initialData, mode, userName, loadError }: { initialData: PlannerData; mode: WorkspaceMode; userName: string; loadError?: string }) {
   const [data, setData] = useState(initialData);
   const [activeView, setActiveView] = useState<View>("dashboard");
   const [isPlanning, setIsPlanning] = useState(false);
@@ -20,6 +22,7 @@ export function AppShell({ initialData }: { initialData: PlannerData }) {
   const notify = (message: string) => { setToast(message); window.setTimeout(() => setToast(null), 3200); };
   const changeView = (view: View) => setActiveView(view);
   const ask = (question: string) => { setAssistantPrompt(question); setActiveView("assistant"); };
+  const exitWorkspace = () => { void leaveWorkspace(mode, (options) => signOut(options), (url) => window.location.assign(url)); };
   const completeSession = (session: StudySession) => { setData((current) => ({ ...current, sessions: current.sessions.map((item) => item.id === session.id ? { ...item, status: "COMPLETED", actualMins: Math.round((new Date(item.endsAt).getTime() - new Date(item.startsAt).getTime()) / 60_000) } : item) })); notify("Session marked complete — great work."); };
   const completeTask = (id: string) => { setData((current) => ({ ...current, tasks: current.tasks.map((task) => task.id === id ? { ...task, progress: 100, completedAt: new Date().toISOString() } : task) })); notify("Task marked complete."); };
   const upsertCourse = (course: Course) => { setData((current) => ({ ...current, courses: current.courses.some((item) => item.id === course.id) ? current.courses.map((item) => item.id === course.id ? course : item) : [...current.courses, course] })); notify(`${course.code} saved.`); };
@@ -39,5 +42,5 @@ export function AppShell({ initialData }: { initialData: PlannerData }) {
   else if (activeView === "assistant") content = <AssistantView key={assistantPrompt} data={data} initialQuestion={assistantPrompt} onQuestionUsed={() => setAssistantPrompt("")} />;
   else content = <SettingsView data={data} onAvailabilityChange={(availability) => { setData((current) => ({ ...current, availability })); notify("Availability saved."); }} />;
 
-  return <div className="app-frame"><Sidebar activeView={activeView} onChange={changeView} /><main className="app-main"><header className="mobile-header"><button className="brand" onClick={() => changeView("dashboard")}><span className="brand-mark"><Icon name="lightning" size={18} /></span><span>StudyPilot</span></button><span>{viewTitle[activeView]}</span></header><div className="top-actions"><button className="mobile-nav-button" onClick={() => changeView("dashboard")} aria-label="Dashboard"><Icon name="grid" size={19} /></button><button className="generate-button" onClick={generatePlan} disabled={isPlanning}>{isPlanning ? <span className="spinner" /> : <Icon name="sparkle" size={17} />}{isPlanning ? "Building your plan…" : "Generate study plan"}</button></div>{content}</main>{toast && <div className="toast" role="status"><Icon name="check" size={16} />{toast}</div>}</div>;
+  return <div className="app-frame"><Sidebar activeView={activeView} onChange={changeView} mode={mode} userName={userName} onExit={exitWorkspace} /><main className="app-main"><header className="mobile-header"><button className="brand" onClick={() => changeView("dashboard")}><span className="brand-mark"><Icon name="lightning" size={18} /></span><span>StudyPilot</span></button><span>{viewTitle[activeView]}</span></header>{mode === "demo" && <div className="demo-banner"><span><Icon name="sparkle" size={15} /><strong>You’re exploring the interactive demo.</strong> Changes stay in this browser and won’t be saved.</span><button onClick={exitWorkspace}>Exit demo</button></div>}{loadError && <div className="load-error" role="alert">{loadError}</div>}<div className="top-actions"><button className="mobile-nav-button" onClick={() => changeView("dashboard")} aria-label="Dashboard"><Icon name="grid" size={19} /></button><button className="generate-button" onClick={generatePlan} disabled={isPlanning}>{isPlanning ? <span className="spinner" /> : <Icon name="sparkle" size={17} />}{isPlanning ? "Building your plan…" : "Generate study plan"}</button></div>{content}</main>{toast && <div className="toast" role="status"><Icon name="check" size={16} />{toast}</div>}</div>;
 }

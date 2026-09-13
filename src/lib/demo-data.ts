@@ -38,3 +38,7 @@ export function createDemoData(): PlannerData {
     ],
   };
 }
+
+export function createEmptyPlannerData(): PlannerData {
+  return { courses: [], tasks: [], availability: [], blockedTimes: [], sessions: [] };
+}
