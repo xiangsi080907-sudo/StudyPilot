@@ -104,7 +104,7 @@ Open [http://localhost:3000](http://localhost:3000). Unauthenticated visitors se
 | --- | --- | --- |
 | `DATABASE_URL` | for persistence | PostgreSQL connection string used by Prisma |
 | `AUTH_SECRET` | for deployed auth | Long, random Auth.js signing secret |
-| `AUTH_URL` | recommended | Application URL used by Auth.js |
+| `AUTH_URL` | usually omit | Auth.js v5 infers the request origin on Vercel; only set this for a non-standard base path, never to `localhost` in production |
 | `OPENAI_API_KEY` | optional | Enables validated AI activity/rationale enrichment and assistant answers |
 
 Never commit `.env.local` or place secrets in client-side code.
@@ -133,4 +133,4 @@ The unit suite verifies deadline-based prioritization, credential authorization,
 
 ## Deployment
 
-Deploy to Vercel, Railway, Render, or another Node.js host with a managed PostgreSQL database. Configure all environment variables in the host, run `prisma migrate deploy` during release, and set a strong unique `AUTH_SECRET`. For production reminders, attach a queue or cron job to query `Task` and `StudySession` records and create `Notification` records; the schema is already structured for this addition.
+Deploy to Vercel, Railway, Render, or another Node.js host with a managed PostgreSQL database. Configure `DATABASE_URL` and one strong, stable `AUTH_SECRET` in every environment that authenticates users, then run `prisma migrate deploy` during release. On Vercel, Auth.js uses forwarded host headers and HTTPS secure cookies; leave `AUTH_URL` unset unless the deployment uses a non-standard base path. For production reminders, attach a queue or cron job to query `Task` and `StudySession` records and create `Notification` records; the schema is already structured for this addition.

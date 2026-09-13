@@ -1,3 +1,4 @@
+import React from "react";
 import { AppShell } from "@/components/app-shell";
 import { LandingPage } from "@/components/landing-page";
 import { auth } from "@/auth";
@@ -7,7 +8,7 @@ import { loadPlannerData } from "@/lib/planner-repository";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const session = process.env.AUTH_SECRET ? await auth() : null;
+  const session = await auth();
   if (!session?.user?.id) return <LandingPage />;
   try {
     return <AppShell initialData={await loadPlannerData(session.user.id)} mode="authenticated" userName={session.user.name ?? "Student"} />;
