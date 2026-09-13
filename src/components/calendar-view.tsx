@@ -1,0 +1,23 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { addDays, formatTime, minutesBetween, startOfDay } from "@/lib/date";
+import type { PlannerData, StudySession } from "@/lib/types";
+import { Icon } from "@/components/ui/icon";
+
+function monday(date: Date) { const next = startOfDay(date); const shift = (next.getDay() + 6) % 7; return addDays(next, -shift); }
+function sameDay(a: string, b: Date) { return new Date(a).toDateString() === b.toDateString(); }
+
+export function CalendarView({ data, onMove, onComplete, onDelete }: { data: PlannerData; onMove: (id: string, targetDay: Date) => void; onComplete: (session: StudySession) => void; onDelete: (id: string) => void }) {
+  const [week, setWeek] = useState(() => monday(new Date()));
+  const [selected, setSelected] = useState<StudySession | null>(null);
+  const days = useMemo(() => Array.from({ length: 7 }, (_, index) => addDays(week, index)), [week]);
+  const range = `${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(days[0])} – ${new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(days[6])}`;
+  const course = selected ? data.courses.find((item) => item.id === selected.courseId) : undefined;
+
+  return <div className="view calendar-view"><div className="view-heading"><div><div className="eyebrow">SCHEDULE</div><h1>Your study calendar</h1><p>Drag a session to move it to another day. Your availability stays protected.</p></div><button className="soft-button" onClick={() => setWeek(monday(new Date()))}>Today</button></div>
+    <div className="calendar-toolbar"><div className="week-nav"><button className="icon-button" aria-label="Previous week" onClick={() => setWeek(addDays(week, -7))}><Icon name="chevron" size={18} className="rotate-left" /></button><strong>{range}</strong><button className="icon-button" aria-label="Next week" onClick={() => setWeek(addDays(week, 7))}><Icon name="chevron" size={18} /></button></div><div className="calendar-legend">{data.courses.map((item) => <span key={item.id}><i style={{ backgroundColor: item.color }} />{item.code}</span>)}</div></div>
+    <div className="calendar-shell"><div className="calendar-grid">{days.map((day) => { const sessions = data.sessions.filter((session) => sameDay(session.startsAt, day)); const isCurrent = day.toDateString() === new Date().toDateString(); return <section className={`calendar-day ${isCurrent ? "current-day" : ""}`} key={day.toISOString()} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { const id = event.dataTransfer.getData("sessionId"); if (id) onMove(id, day); }}><header><span>{new Intl.DateTimeFormat("en-US", { weekday: "short" }).format(day)}</span><strong>{day.getDate()}</strong></header><div className="calendar-events">{sessions.length ? sessions.sort((a, b) => a.startsAt.localeCompare(b.startsAt)).map((session) => { const itemCourse = data.courses.find((item) => item.id === session.courseId); return <button draggable key={session.id} onDragStart={(event) => event.dataTransfer.setData("sessionId", session.id)} className={`calendar-event ${session.status.toLowerCase()}`} style={{ "--event-color": itemCourse?.color } as React.CSSProperties} onClick={() => setSelected(session)}><span>{formatTime(session.startsAt)}</span><strong>{session.activity}</strong><small>{minutesBetween(session.startsAt, session.endsAt)} min</small></button>; }) : <p className="open-day">Open</p>}</div></section>; })}</div></div>
+    {selected && <div className="modal-backdrop" role="presentation" onMouseDown={() => setSelected(null)}><aside className="session-modal" role="dialog" aria-modal="true" aria-label="Study session details" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" onClick={() => setSelected(null)} aria-label="Close"><Icon name="close" size={18} /></button><span className="event-course" style={{ color: course?.color }}>{course?.code}</span><h2>{selected.activity}</h2><p>{new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric" }).format(new Date(selected.startsAt))} · {formatTime(selected.startsAt)} – {formatTime(selected.endsAt)}</p><div className="rationale"><Icon name="sparkle" size={16} /><span>{selected.rationale}</span></div><div className="modal-actions">{selected.status !== "COMPLETED" && <button className="primary-button" onClick={() => { onComplete(selected); setSelected(null); }}>Mark complete <Icon name="check" size={16} /></button>}<button className="danger-button" onClick={() => { onDelete(selected.id); setSelected(null); }}><Icon name="trash" size={16} /> Delete</button></div></aside></div>}
+  </div>;
+}
