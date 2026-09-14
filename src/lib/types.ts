@@ -8,7 +8,9 @@ export interface Course {
   professor?: string;
   color: string;
   icon: "code" | "function" | "landmark" | "book";
+  /** GPA on a 0.0–4.0 scale. */
   currentGrade?: number;
+  /** GPA on a 0.0–4.0 scale. */
   targetGrade?: number;
   priority: number;
 }

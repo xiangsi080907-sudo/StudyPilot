@@ -23,6 +23,27 @@ test("demo scheduling remains usable", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Your study calendar" })).toBeVisible();
 });
 
+test("course grade goals use validated GPA values", async ({ page }) => {
+  await page.goto("/demo");
+  await page.getByRole("button", { name: "Courses" }).click();
+  await expect(page.getByText("Target GPA").first()).toBeVisible();
+  await page.getByRole("button", { name: /add course/i }).click();
+  const targetGpa = page.getByLabel("Target GPA");
+  await expect(targetGpa).toHaveAttribute("min", "0");
+  await expect(targetGpa).toHaveAttribute("max", "4");
+  await expect(targetGpa).toHaveAttribute("step", "0.1");
+  await page.getByLabel("Course name").fill("Biology");
+  await page.getByLabel("Course code").fill("BIO 101");
+  await targetGpa.fill("3.7");
+  await page.getByRole("button", { name: "Save course" }).click();
+  const biology = page.locator(".course-card").filter({ has: page.getByRole("heading", { name: "Biology" }) });
+  await expect(biology.getByText("3.7", { exact: true })).toBeVisible();
+  await biology.getByRole("button", { name: "Edit BIO 101" }).click();
+  await page.getByLabel("Target GPA").fill("4.0");
+  await page.getByRole("button", { name: "Save course" }).click();
+  await expect(biology.getByText("4.0", { exact: true })).toBeVisible();
+});
+
 test("auth pages and protected APIs are available without leaking planner data", async ({ page }) => {
   await page.goto("/sign-up");
   await expect(page.getByRole("heading", { name: /build a calmer study week/i })).toBeVisible();

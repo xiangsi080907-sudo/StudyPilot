@@ -91,7 +91,9 @@ model Course {
   professor     String?
   color         String         @default("#7567F8")
   icon          String         @default("book")
+  /// GPA on a 0.0–4.0 scale. Legacy percentage values are converted by migration 20260913230000.
   currentGrade  Float?
+  /// GPA on a 0.0–4.0 scale. Legacy percentage values are converted by migration 20260913230000.
   targetGrade   Float?
   priority      Int            @default(3)
   createdAt     DateTime       @default(now())

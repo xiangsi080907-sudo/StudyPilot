@@ -10,9 +10,9 @@ function onDay(dayOffset: number, hour: number, minute = 0): string {
 export function createDemoData(): PlannerData {
   return {
     courses: [
-      { id: "cse", code: "CSE 123", name: "Data Structures", professor: "Dr. Patel", color: "#7567F8", icon: "code", currentGrade: 89, targetGrade: 92, priority: 5 },
-      { id: "math", code: "MATH 208", name: "Linear Algebra", professor: "Prof. Rivera", color: "#20A36B", icon: "function", currentGrade: 93, targetGrade: 95, priority: 4 },
-      { id: "hist", code: "HIST 101", name: "Modern World History", professor: "Dr. Okafor", color: "#F39A3F", icon: "landmark", currentGrade: 86, targetGrade: 90, priority: 3 },
+      { id: "cse", code: "CSE 123", name: "Data Structures", professor: "Dr. Patel", color: "#7567F8", icon: "code", currentGrade: 3.3, targetGrade: 3.7, priority: 5 },
+      { id: "math", code: "MATH 208", name: "Linear Algebra", professor: "Prof. Rivera", color: "#20A36B", icon: "function", currentGrade: 4.0, targetGrade: 4.0, priority: 4 },
+      { id: "hist", code: "HIST 101", name: "Modern World History", professor: "Dr. Okafor", color: "#F39A3F", icon: "landmark", currentGrade: 3.0, targetGrade: 3.3, priority: 3 },
     ],
     tasks: [
       { id: "mini-git", courseId: "cse", title: "Mini-Git project", type: "PROJECT", dueAt: onDay(3, 23, 59), estimatedMins: 720, difficulty: 5, progress: 30, priority: 5, notes: "Implement add, commit, log, and branch commands." },

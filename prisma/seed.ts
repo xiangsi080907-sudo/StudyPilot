@@ -20,9 +20,9 @@ async function main() {
       passwordHash: await bcrypt.hash("DemoPass123!", 12),
       courses: {
         create: [
-          { name: "Data Structures", code: "CSE 123", professor: "Dr. Patel", color: "#7567F8", icon: "code", currentGrade: 89, targetGrade: 92, priority: 5 },
-          { name: "Linear Algebra", code: "MATH 208", professor: "Prof. Rivera", color: "#22A06B", icon: "function", currentGrade: 93, targetGrade: 95, priority: 4 },
-          { name: "Modern World History", code: "HIST 101", professor: "Dr. Okafor", color: "#F49B3E", icon: "landmark", currentGrade: 86, targetGrade: 90, priority: 3 },
+          { name: "Data Structures", code: "CSE 123", professor: "Dr. Patel", color: "#7567F8", icon: "code", currentGrade: 3.3, targetGrade: 3.7, priority: 5 },
+          { name: "Linear Algebra", code: "MATH 208", professor: "Prof. Rivera", color: "#22A06B", icon: "function", currentGrade: 4.0, targetGrade: 4.0, priority: 4 },
+          { name: "Modern World History", code: "HIST 101", professor: "Dr. Okafor", color: "#F49B3E", icon: "landmark", currentGrade: 3.0, targetGrade: 3.3, priority: 3 },
         ],
       },
       availability: {

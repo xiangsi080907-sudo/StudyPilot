@@ -4,13 +4,13 @@ StudyPilot is an AI-assisted study planner that turns a student’s actual workl
 
 ## What it does
 
-- Creates and manages courses with priority, color, instructor, and grade targets.
+- Creates and manages courses with priority, color, instructor, and GPA targets on a 0.0–4.0 scale.
 - Tracks assignments, projects, readings, quizzes, and exams with remaining effort, difficulty, progress, and deadlines.
 - Generates availability-aware study sessions in 45–90 minute blocks, including 15-minute recovery breaks.
 - Scores work using deadline urgency, remaining workload, difficulty, task priority, progress, and assessment type.
 - Shows a polished dashboard, weekly calendar, analytics, course progress, deadline risk, and in-app feedback.
 - Supports manual calendar moves, completion, and deletion. Regeneration replaces only prior generated sessions so it does not duplicate a plan.
-- Provides a context-aware assistant that uses only the supplied course/task summary. When `OPENAI_API_KEY` is unavailable, it gives deterministic, data-based guidance.
+- Provides a context-aware assistant that loads the signed-in student's planner data server-side. When `OPENAI_API_KEY` is unavailable, a deterministic rule-based coach gives deadline-, workload-, and availability-aware guidance.
 - Includes Auth.js credentials authentication, secure password hashing, user-scoped REST endpoints, relational PostgreSQL models, and input validation with Zod.
 
 ## Technology
@@ -67,6 +67,7 @@ The Prisma schema includes `User`, `Course`, `Task`, `Availability`, `BlockedTim
 - Courses are unique per user/code; task and session queries are indexed by user and time.
 - Course and task API handlers obtain the authenticated user and always scope both reads and writes to that user.
 - Task creation confirms that the target course belongs to the current user.
+- Course `currentGrade` and `targetGrade` store GPA values from 0.0 through 4.0. Migration `20260913230000_convert_course_grades_to_gpa` converts legacy percentage values above 4.0 using the documented common U.S. plus/minus scale; values already in the GPA range are unchanged.
 
 ## Local setup
 
@@ -114,7 +115,7 @@ Never commit `.env.local` or place secrets in client-side code.
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | `POST` | `/api/study-plan` | Validates planner data and creates deterministic or AI-enriched structured sessions |
-| `POST` | `/api/assistant` | Answers a study question using minimal supplied planning context |
+| `POST` | `/api/assistant` | Answers a study question using authenticated, server-loaded planning context |
 | `GET`, `POST` | `/api/courses` | Authenticated, user-scoped course operations |
 | `GET`, `POST` | `/api/tasks` | Authenticated, user-scoped task operations |
 | `POST` | `/api/auth/register` | Validated account registration with a bcrypt hash |
@@ -133,4 +134,4 @@ The unit suite verifies deadline-based prioritization, credential authorization,
 
 ## Deployment
 
-Deploy to Vercel, Railway, Render, or another Node.js host with a managed PostgreSQL database. Configure `DATABASE_URL` and one strong, stable `AUTH_SECRET` in every environment that authenticates users, then run `prisma migrate deploy` during release. On Vercel, Auth.js uses forwarded host headers and HTTPS secure cookies; leave `AUTH_URL` unset unless the deployment uses a non-standard base path. For production reminders, attach a queue or cron job to query `Task` and `StudySession` records and create `Notification` records; the schema is already structured for this addition.
+Deploy to Vercel, Railway, Render, or another Node.js host with a managed PostgreSQL database. Configure `DATABASE_URL` and one strong, stable `AUTH_SECRET` in every environment that authenticates users, then run `prisma migrate deploy` during release. This release includes a data migration that converts legacy percentage course grades into GPA values: 93–100→4.0, 90–92→3.7, 87–89→3.3, 83–86→3.0, 80–82→2.7, 77–79→2.3, 73–76→2.0, 70–72→1.7, 67–69→1.3, 63–66→1.0, 60–62→0.7, and lower values→0.0. On Vercel, Auth.js uses forwarded host headers and HTTPS secure cookies; leave `AUTH_URL` unset unless the deployment uses a non-standard base path. For production reminders, attach a queue or cron job to query `Task` and `StudySession` records and create `Notification` records; the schema is already structured for this addition.

@@ -6,7 +6,7 @@ const sessionStatus = z.enum(["PLANNED", "COMPLETED", "SKIPPED"]);
 export const courseSchema = z.object({
   id: z.string().min(1), code: z.string().min(2).max(20), name: z.string().min(2).max(100), professor: z.string().max(100).optional(),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/), icon: z.enum(["code", "function", "landmark", "book"]),
-  currentGrade: z.number().min(0).max(100).optional(), targetGrade: z.number().min(0).max(100).optional(), priority: z.number().int().min(1).max(5),
+  currentGrade: z.number().min(0).max(4).optional(), targetGrade: z.number().min(0).max(4).optional(), priority: z.number().int().min(1).max(5),
 });
 
 export const taskSchema = z.object({
