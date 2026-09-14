@@ -22,7 +22,8 @@ export const plannerDataSchema = z.object({
   sessions: z.array(z.object({ id: z.string().min(1), courseId: z.string().min(1), taskId: z.string().optional(), startsAt: z.string().datetime(), endsAt: z.string().datetime(), activity: z.string().min(1).max(240), rationale: z.string().max(400), status: sessionStatus, actualMins: z.number().int().min(0).max(1000).optional(), planVersion: z.string().max(100).optional() })).max(500),
 });
 
-export const assistantRequestSchema = z.object({ question: z.string().trim().min(3).max(500), data: plannerDataSchema });
+export const assistantRequestSchema = z.object({ question: z.string().trim().min(3).max(500) });
+export const demoAssistantRequestSchema = assistantRequestSchema.extend({ demo: z.literal(true), data: plannerDataSchema });
 
 export const aiSessionSchema = z.object({
   id: z.string().min(1), taskId: z.string().min(1), startsAt: z.string().datetime(), endsAt: z.string().datetime(), activity: z.string().min(3).max(240), rationale: z.string().min(3).max(400),

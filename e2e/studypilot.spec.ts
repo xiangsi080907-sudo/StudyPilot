@@ -12,7 +12,7 @@ test("enters and exits explicitly labeled demo mode", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("link", { name: /try the demo/i }).click();
   await expect(page.getByText(/you.re exploring the interactive demo/i)).toBeVisible();
-  await expect(page.getByRole("heading", { name: /good afternoon, maya/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /good (morning|afternoon|evening), demo student/i })).toBeVisible();
   await page.getByRole("button", { name: "Exit demo" }).first().click();
   await expect(page.getByRole("heading", { name: /less planning. more progress./i })).toBeVisible();
 });

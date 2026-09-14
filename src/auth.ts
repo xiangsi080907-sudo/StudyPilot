@@ -11,11 +11,21 @@ export const authOptions = {
   pages: { signIn: "/sign-in" },
   callbacks: {
     async jwt({ token, user }) {
-      if (user?.id) token.sub = user.id;
+      if (user) {
+        token.sub = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
+      }
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token.sub) session.user.id = token.sub;
+      if (session.user) {
+        if (token.sub) session.user.id = token.sub;
+        session.user.name = token.name;
+        if (typeof token.email === "string") session.user.email = token.email;
+        session.user.image = token.picture;
+      }
       return session;
     },
     async redirect({ url, baseUrl }) {

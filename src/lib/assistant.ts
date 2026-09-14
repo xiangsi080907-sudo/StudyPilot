@@ -25,8 +25,14 @@ export function deterministicAssistant(question: string, data: PlannerData): str
   return `Prioritize ${top.task.title} for ${course?.code ?? "your top course"}. It is due ${formatShortDate(top.task.dueAt)}, has ${Math.ceil(top.remainingMins / 60)} hours remaining, and currently has the highest scheduling score.`;
 }
 
-export async function answerStudyQuestion(question: string, data: PlannerData): Promise<{ answer: string; source: "ai" | "planner" }> {
-  if (!process.env.OPENAI_API_KEY) return { answer: deterministicAssistant(question, data), source: "planner" };
+export async function answerStudyQuestion(question: string, data: PlannerData): Promise<{ answer: string; source: "ai" | "planner"; notice?: string }> {
+  if (!process.env.OPENAI_API_KEY) {
+    return {
+      answer: deterministicAssistant(question, data),
+      source: "planner",
+      notice: "AI is not configured, so this suggestion is based on your StudyPilot plan.",
+    };
+  }
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const context = data.tasks.map((task) => ({ title: task.title, type: task.type, dueAt: task.dueAt, progress: task.progress, estimatedHoursRemaining: Math.ceil(task.estimatedMins * (1 - task.progress / 100) / 60), course: data.courses.find((course) => course.id === task.courseId)?.code })).slice(0, 25);
@@ -40,6 +46,10 @@ export async function answerStudyQuestion(question: string, data: PlannerData): 
     });
     return { answer: response.choices[0]?.message.content?.trim() || deterministicAssistant(question, data), source: "ai" };
   } catch {
-    return { answer: deterministicAssistant(question, data), source: "planner" };
+    return {
+      answer: deterministicAssistant(question, data),
+      source: "planner",
+      notice: "The AI service is unavailable right now, so this suggestion is based on your StudyPilot plan.",
+    };
   }
 }
